@@ -1,0 +1,48 @@
+sequenceDiagram
+    autonumber
+    actor customer as Customer
+    participant application as InsuranceApplication
+    participant property as Property
+    participant expert as PropertyExpert
+    participant assessment as PropertyAssessment
+    participant agent as InsuranceAgent
+    participant policy as InsurancePolicy
+    participant simulator as OperationSimulator
+    participant payment as Payment
+    participant claim as Claim
+    participant damage as DamageAssessment
+
+    customer->>property: Зареєструвати майно
+    customer->>application: submit(майно)
+    application->>property: isValid()
+    alt Майно недійсне
+        application-->>customer: Відхилити заявку
+    else Майно дійсне
+        application-->>agent: Передати заявку
+        agent->>expert: assessProperty(property)
+        expert->>assessment: create(property)
+        assessment-->>agent: Передати оцінку вартості
+        agent->>application: Розрахувати тариф
+        agent->>policy: createPolicy(application)
+        policy-->>customer: Активувати договір
+    end
+
+    Note over claim,damage: Обробка страхового випадку
+    customer->>claim: submit(policy, description)
+    claim->>policy: Перевірити активний статус
+    alt Поліс неактивний
+        claim-->>customer: Відмовити в прийнятті заяви
+    else Поліс активний
+        claim->>expert: assessDamage(claim)
+        expert->>damage: evaluate()
+        damage-->>claim: Повідомити суму збитку
+        alt Сума збитку дорівнює нулю
+            claim-->>customer: Нарахування не проводити
+        else Сума збитку додатна
+            claim->>agent: Схвалити нарахування
+            agent->>payment: calculateAmount()
+            agent->>simulator: simulatePayment(payment)
+            simulator-->>payment: Позначити консольну симуляцію
+            payment-->>customer: Повідомити суму
+        end
+    end

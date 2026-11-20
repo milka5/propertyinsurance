@@ -1,0 +1,51 @@
+@startuml
+left to right direction
+title Система страхування майна
+
+actor "Страхувальник" as Customer
+actor "Страховий агент" as InsuranceAgent
+actor "Експерт-оцінювач" as PropertyExpert
+
+rectangle "Система страхування майна" {
+  usecase "Зареєструвати майно" as UC_register_property
+  usecase "Подати заявку на страхування" as UC_submit_application
+  usecase "Відхилити неповні відомості" as UC_reject_property
+  usecase "Переглянути подану заявку" as UC_review_application
+  usecase "Оцінити вартість майна" as UC_assess_property
+  usecase "Передати оцінку агенту" as UC_transfer_assessment
+  usecase "Розрахувати тариф" as UC_calculate_premium
+  usecase "Укласти договір" as UC_create_policy
+  usecase "Подати страхову заяву" as UC_submit_claim
+  usecase "Оцінити збитки" as UC_assess_damage
+  usecase "Нарахувати виплату" as UC_pay
+  usecase "Зафіксувати нульовий збиток" as UC_zero_damage
+  usecase "Симулювати зовнішню виплату" as UC_simulate_payment
+  usecase "Переглянути власні активні поліси" as UC_view_policies
+  usecase "Оновити статус договору" as UC_update_policy
+}
+
+Customer --> UC_register_property
+Customer --> UC_submit_application
+Customer --> UC_submit_claim
+Customer --> UC_view_policies
+
+InsuranceAgent --> UC_review_application
+InsuranceAgent --> UC_calculate_premium
+InsuranceAgent --> UC_create_policy
+InsuranceAgent --> UC_pay
+InsuranceAgent --> UC_update_policy
+InsuranceAgent --> UC_simulate_payment
+
+PropertyExpert --> UC_assess_property
+PropertyExpert --> UC_transfer_assessment
+PropertyExpert --> UC_assess_damage
+
+UC_submit_application ..> UC_reject_property : <<дозволяє відхилення>>
+UC_review_application ..> UC_assess_property : <<передає на оцінку>>
+UC_assess_property ..> UC_transfer_assessment : <<include>>
+UC_calculate_premium ..> UC_create_policy : <<include>>
+UC_submit_claim ..> UC_assess_damage : <<include>>
+UC_assess_damage ..> UC_zero_damage : <<обирає при нульовому збитку>>
+UC_assess_damage ..> UC_pay : <<обирає при додатному збитку>>
+UC_pay ..> UC_simulate_payment : <<тільки консольна симуляція>>
+@enduml

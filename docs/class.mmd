@@ -1,0 +1,119 @@
+classDiagram
+    direction TB
+
+    class Customer {
+        -String id
+        -String contactDetails
+        +Customer(id, contactDetails)
+        +createInsuranceApplication(property: Property) InsuranceApplication
+        +submitClaim(policy: InsurancePolicy, description) Claim
+        +viewActivePolicies() List~InsurancePolicy~
+    }
+
+    class Property {
+        -String id
+        -String description
+        -double declaredValue
+        +Property(id, description, declaredValue)
+        +isValid() boolean
+    }
+
+    class InsuranceApplication {
+        -String status
+        +InsuranceApplication(customer: Customer, property: Property)
+        +submit() void
+        +reject() void
+    }
+
+    class InsuranceAgent {
+        -OperationSimulator operationSimulator
+        +InsuranceAgent(operationSimulator: OperationSimulator)
+        +calculatePremium(application: InsuranceApplication) double
+        +createPolicy(application: InsuranceApplication) InsurancePolicy
+        +processPayment(claim: Claim) Payment
+        +updatePolicyStatus(policy: InsurancePolicy, status) boolean
+    }
+
+    class PropertyExpert {
+        +PropertyExpert()
+        +assessProperty(property: Property) PropertyAssessment
+        +assessDamage(claim: Claim) DamageAssessment
+    }
+
+    class Assessment {
+        -String id
+        -double amount
+        +Assessment(id)
+        +evaluate()* double
+    }
+    <<abstract>> Assessment
+
+    class PropertyAssessment {
+        -Property property
+        +PropertyAssessment(property: Property)
+        +evaluate() double
+    }
+
+    class InsurancePolicy {
+        -String policyNumber
+        -String status
+        +InsurancePolicy(policyNumber, customer: Customer)
+        +activate() void
+        +updateStatus(status) boolean
+    }
+
+    class Claim {
+        -String description
+        -String status
+        +Claim(policy: InsurancePolicy, description)
+        +submit() void
+        +approve() void
+    }
+
+    class DamageAssessment {
+        -Claim claim
+        -double damageAmount
+        +DamageAssessment(claim: Claim)
+        +evaluate() double
+    }
+
+    class Payment {
+        -double amount
+        -String status
+        +Payment(claim: Claim, policy: InsurancePolicy, amount)
+        +calculateAmount() double
+        +markSimulated() void
+    }
+
+    class OperationSimulator
+    <<interface>> OperationSimulator
+    OperationSimulator : +simulatePayment(payment: Payment) void
+
+    class ConsoleOperationSimulator {
+        +ConsoleOperationSimulator()
+        +simulatePayment(payment: Payment) void
+    }
+
+    Customer "1" o-- "many" Property : володіє
+    Customer "1" --> "many" InsuranceApplication : подає
+    InsuranceApplication "many" --> "1" Property : стосується
+    InsuranceApplication "many" --> "0..1" PropertyAssessment : оцінюється
+    InsuranceApplication "1" --> "0..1" InsurancePolicy : породжує
+    Customer "1" --> "many" InsurancePolicy : переглядає
+    InsurancePolicy "1" --> "many" Claim : приймає
+    Claim "1" --> "1" DamageAssessment : оцінюється
+    Claim "1" --> "0..1" Payment : породжує
+    Payment "many" --> "1" InsurancePolicy : належить
+    Assessment <|-- PropertyAssessment : наслідує
+    Assessment <|-- DamageAssessment : наслідує
+    PropertyExpert --> PropertyAssessment : створює
+    PropertyExpert --> DamageAssessment : створює
+    InsuranceAgent --> InsuranceApplication : опрацьовує
+    InsuranceAgent --> InsurancePolicy : оновлює
+    InsuranceAgent --> Claim : схвалює
+    InsuranceAgent --> Payment : оформлює
+    InsuranceAgent ..> OperationSimulator : залежить
+    OperationSimulator <|.. ConsoleOperationSimulator : реалізує
+    OperationSimulator ..> Payment : приймає
+
+    note for Payment "Метод calculateAmount() має модифікатор final"

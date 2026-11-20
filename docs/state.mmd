@@ -1,0 +1,49 @@
+stateDiagram-v2
+    [*] --> Draft
+
+    state "Життєвий цикл заявки" as InsuranceApplicationLifecycle {
+        Draft --> Submitted : Клієнт подає заявку
+        Submitted --> UnderReview : Агент переглядає заявку
+        UnderReview --> Assessed : Експерт оцінює майно
+        Assessed --> PremiumCalculated : Агент розраховує тариф
+        PremiumCalculated --> Accepted : Договір укладено
+        Submitted --> Rejected : Відомості неповні
+        UnderReview --> Rejected : Відомості недійсні
+        Rejected --> [*]
+        Accepted --> [*]
+    }
+
+    [*] --> WaitingForActivation
+
+    state "Життєвий цикл поліса" as InsurancePolicyLifecycle {
+        WaitingForActivation --> Active : activate()
+        Active --> Completed : Завершити договір
+        Active --> Cancelled : Скасувати договір
+        Completed --> Completed : Завершений поліс не оновлюється
+        Cancelled --> [*]
+        Completed --> [*]
+        Active --> Active : Допустиме оновлення активного статусу
+    }
+
+    [*] --> ClaimSubmitted
+
+    state "Життєвий цикл страхової заяви" as ClaimLifecycle {
+        ClaimSubmitted --> ClaimRejected : Поліс неактивний
+        ClaimSubmitted --> Assessing : Поліс активний
+        Assessing --> ZeroDamage : Сума збитку дорівнює нулю
+        Assessing --> Approved : Сума збитку додатна
+        ZeroDamage --> NoPayment : Виплату не нараховувати
+        Approved --> PaymentAccrued : Нарахувати виплату
+        ClaimRejected --> [*]
+        NoPayment --> [*]
+        PaymentAccrued --> [*]
+    }
+
+    state "Життєвий цикл виплати" as PaymentLifecycle {
+        [*] --> NotAccrued
+        NotAccrued --> Accrued : Нарахувати суму
+        Accrued --> ConsoleSimulated : simulatePayment(payment)
+        ConsoleSimulated --> [*]
+        NotAccrued --> NoPayment : Нульова оцінка
+        NoPayment --> [*]
+    }
