@@ -81,7 +81,7 @@ classDiagram
         -double amount
         -String status
         +Payment(claim: Claim, policy: InsurancePolicy, amount)
-        +calculateAmount() double
+        +calculateAmount() double <<final>>
         +markSimulated() void
     }
 
@@ -96,6 +96,7 @@ classDiagram
 
     Customer "1" o-- "many" Property : володіє
     Customer "1" --> "many" InsuranceApplication : подає
+    Customer "1" --> "many" Claim : створює
     InsuranceApplication "many" --> "1" Property : стосується
     InsuranceApplication "many" --> "0..1" PropertyAssessment : оцінюється
     InsuranceApplication "1" --> "0..1" InsurancePolicy : породжує
@@ -106,6 +107,8 @@ classDiagram
     Payment "many" --> "1" InsurancePolicy : належить
     Assessment <|-- PropertyAssessment : наслідує
     Assessment <|-- DamageAssessment : наслідує
+    PropertyExpert --> Property : оцінює
+    PropertyExpert --> Claim : оцінює збитки
     PropertyExpert --> PropertyAssessment : створює
     PropertyExpert --> DamageAssessment : створює
     InsuranceAgent --> InsuranceApplication : опрацьовує
